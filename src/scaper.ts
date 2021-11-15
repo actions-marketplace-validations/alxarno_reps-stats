@@ -1,5 +1,4 @@
 import { Octokit } from "@octokit/core";
-import { format } from "path/posix";
 import { IUserInfo } from "./interfaces";
 
 type IActivity = {

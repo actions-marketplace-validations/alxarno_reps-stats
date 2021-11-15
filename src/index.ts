@@ -1,6 +1,5 @@
 import { GithubScraper } from "./scaper";
 import { CSVWriter } from "./csv";
-import { FileDumper } from "./file";
 import { S3Dumper } from "./s3";
 const core = require("@actions/core");
 
