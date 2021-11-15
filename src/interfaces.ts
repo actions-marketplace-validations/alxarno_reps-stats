@@ -1,6 +1,5 @@
 export interface IUserInfo {
   Member: string;
-  HasActiveContributions: boolean;
   CommitsCreated: number;
   IssuesCreated: number;
   OpenIssuesAuthor: number;
@@ -15,4 +14,10 @@ export interface IUserInfo {
   OldIssues: number;
   CodeLinesAdded: number;
   CodeLinesRemoved: number;
+  From: string;
+  To: string;
+}
+
+export interface IDumper {
+  Write(buff: Buffer, name: string): Promise<void>;
 }

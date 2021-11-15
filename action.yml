@@ -1,0 +1,47 @@
+name: GitHub Organization Members Statistics
+description: "Good description is here..."
+
+inputs:
+  token:
+    description: 'A Personal Access token'
+    required: true
+  org-name:
+    description: 'Custom GitHub organization to retrieve data for'
+    default: ''
+    required: true
+  days:
+    description: 'Amount of days in the past to collect data for'
+    default: '1'
+    required: false
+  stale:
+    description: 'Days since last issue update for stale'
+    default: ''
+    required: true
+  old:
+    description: 'Days since last issue update for old'
+    default: ''
+    required: true
+  aws-access-key-id:
+    description: 'AWS Access Key Id for dump data to S3'
+    default: ''
+    required: true
+  aws-secret-access-key:
+    description: 'AWS Access Key Secret for dump data to S3'
+    default: ''
+    required: true
+  aws-s3-bucket:
+    description: 'Name of S3 Bucket'
+    default: ''
+    required: true
+  aws-s3-path:
+    description: 'Path in choosed bucket'
+    default: ''
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'dist/tsc/index.js'
+
+branding:
+  icon: 'list'
+  color: 'green'

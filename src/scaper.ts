@@ -465,15 +465,9 @@ export class GithubScraper {
           nodes {
             login
             contributionsCollection (organizationID: $orgid, from: $from, to: $to) {
-              hasAnyContributions
               totalCommitContributions
               totalIssueContributions
               totalPullRequestContributions
-              totalPullRequestReviewContributions
-              totalRepositoriesWithContributedIssues
-              totalRepositoriesWithContributedCommits
-              totalRepositoriesWithContributedPullRequests
-              totalRepositoriesWithContributedPullRequestReviews
               pullRequestReviewContributionsByRepository(maxRepositories: 100) {
                 contributions {
                   totalCount
@@ -517,8 +511,6 @@ export class GithubScraper {
 
         contribs.push({
           Member: member.login,
-          HasActiveContributions:
-            member.contributionsCollection.hasAnyContributions,
           CommitsCreated:
             member.contributionsCollection.totalCommitContributions,
           IssuesCreated: member.contributionsCollection.totalIssueContributions,
@@ -529,6 +521,8 @@ export class GithubScraper {
               (v: any) => (v.contributions ? v.contributions.totalCount : 0),
               0
             ),
+          From: from.toISOString().substring(0, 19),
+          To: to.toISOString().substring(0, 19),
           ClosedNotSelfIssues: 0,
           ClosedSelfIssues: 0,
           CodeLinesAdded: 0,
