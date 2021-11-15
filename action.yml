@@ -40,7 +40,7 @@ inputs:
 
 runs:
   using: 'node12'
-  main: 'dist/tsc/index.js'
+  main: 'dist/build.js'
 
 branding:
   icon: 'list'
