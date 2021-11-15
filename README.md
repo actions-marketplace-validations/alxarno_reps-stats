@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get Member Contributions
-        uses: alxarno/reps-stats@0.0.1
+        uses: alxarno/reps-stats@0.0.4
         with:
           token: ${{ secrets.ORG_TOKEN }}
           days: 1

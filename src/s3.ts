@@ -1,8 +1,9 @@
 import { IDumper } from "./interfaces";
-import AWS from "aws-sdk";
+
+const AWS = require("aws-sdk");
 
 export class S3Dumper implements IDumper {
-  private s3Client: AWS.S3 | null = null;
+  private s3Client: any = null;
   private bucket: string = "";
   private path: string = "";
   constructor(ID: string, SECRET: string, bucket: string, path: string) {
@@ -24,7 +25,7 @@ export class S3Dumper implements IDumper {
     };
 
     await new Promise((res, rej) => {
-      this.s3Client!.putObject(putParams, function (putErr, putData) {
+      this.s3Client!.putObject(putParams, function (putErr: any, putData: any) {
         if (putErr) {
           console.error(putErr);
           rej();
