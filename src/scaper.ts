@@ -200,15 +200,17 @@ export class GithubScraper {
         result[author].openAuthorIssues++;
       } else {
         result[author].openAssignIssues++;
+
+        if (stale) {
+          result[author].staleIssues++;
+        }
+  
+        if (old) {
+          result[author].oldIssues++;
+        }
       }
 
-      if (stale) {
-        result[author].staleIssues++;
-      }
-
-      if (old) {
-        result[author].oldIssues++;
-      }
+     
     };
 
     do {
