@@ -36,6 +36,7 @@ class GithubScraper {
         return __awaiter(this, void 0, void 0, function* () {
             let repsPagination = null;
             let done = false;
+            let commitsIds = [];
             // const dateOnlyDay = date.toISOString().substring(0, 10);
             let result = {};
             const query = `
@@ -54,7 +55,7 @@ class GithubScraper {
                           edges {
                             node {
                               ... on Commit {
-
+                                abbreviatedOid
                                 committedDate
                                 author{
                                   user {
@@ -99,7 +100,8 @@ class GithubScraper {
                         branchHistory.forEach((bh) => {
                             let commit = bh.node;
                             let commitedDate = Date.parse(commit.committedDate);
-                            if (commit.author.user == null) {
+                            if (commit.author.user == null ||
+                                commitsIds.includes(commit.abbreviatedOid)) {
                                 return;
                             }
                             let commitAuthor = commit.author.user.login;
@@ -111,6 +113,7 @@ class GithubScraper {
                             }
                             result[commitAuthor].codeLinesAdded += commit.additions;
                             result[commitAuthor].codeLinesRemoved += commit.deletions;
+                            commitsIds.push(commit.abbreviatedOid);
                         });
                     });
                 });
@@ -167,12 +170,12 @@ class GithubScraper {
                 }
                 else {
                     result[author].openAssignIssues++;
-                }
-                if (stale) {
-                    result[author].staleIssues++;
-                }
-                if (old) {
-                    result[author].oldIssues++;
+                    if (stale) {
+                        result[author].staleIssues++;
+                    }
+                    if (old) {
+                        result[author].oldIssues++;
+                    }
                 }
             };
             do {

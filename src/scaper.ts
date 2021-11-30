@@ -51,6 +51,7 @@ export class GithubScraper {
   ): Promise<Record<string, IActivity>> {
     let repsPagination = null;
     let done = false;
+    let commitsIds: string[] = [];
     // const dateOnlyDay = date.toISOString().substring(0, 10);
     let result: Record<string, IActivity> = {};
     const query = `
@@ -69,7 +70,7 @@ export class GithubScraper {
                           edges {
                             node {
                               ... on Commit {
-
+                                abbreviatedOid
                                 committedDate
                                 author{
                                   user {
@@ -118,7 +119,10 @@ export class GithubScraper {
           branchHistory.forEach((bh: any) => {
             let commit = bh.node;
             let commitedDate = Date.parse(commit.committedDate);
-            if (commit.author.user == null) {
+            if (
+              commit.author.user == null ||
+              commitsIds.includes(commit.abbreviatedOid)
+            ) {
               return;
             }
             let commitAuthor = commit.author.user.login;
@@ -133,6 +137,7 @@ export class GithubScraper {
 
             result[commitAuthor].codeLinesAdded += commit.additions;
             result[commitAuthor].codeLinesRemoved += commit.deletions;
+            commitsIds.push(commit.abbreviatedOid);
           });
         });
       });
@@ -204,13 +209,11 @@ export class GithubScraper {
         if (stale) {
           result[author].staleIssues++;
         }
-  
+
         if (old) {
           result[author].oldIssues++;
         }
       }
-
-     
     };
 
     do {

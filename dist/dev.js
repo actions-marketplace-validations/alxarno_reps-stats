@@ -18,7 +18,7 @@ function run() {
         const token = "***";
         let scraper = new scaper_1.GithubScraper(token, "1712n");
         let csvWriter = new csv_1.CSVWriter();
-        let s3Dumper = new s3_1.S3Dumper("***", "***", "nterminal-lite", "debug/github-statistics");
+        let s3Dumper = new s3_1.S3Dumper("***", "***", "github-metrics", "github-metrics");
         let to = new Date();
         let from = new Date();
         let startTimeString = to.toISOString().substring(0, 19);

@@ -7,12 +7,7 @@ async function run() {
   const token = "***";
   let scraper = new GithubScraper(token, "1712n");
   let csvWriter = new CSVWriter();
-  let s3Dumper = new S3Dumper(
-    "***",
-    "***",
-    "nterminal-lite",
-    "debug/github-statistics"
-  );
+  let s3Dumper = new S3Dumper("***", "***", "github-metrics", "github-metrics");
 
   let to = new Date();
   let from = new Date();
