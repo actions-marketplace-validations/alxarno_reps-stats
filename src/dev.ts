@@ -7,7 +7,7 @@ async function run() {
   const token = "***";
   let scraper = new GithubScraper(token, "1712n");
   let csvWriter = new CSVWriter();
-  let s3Dumper = new S3Dumper("***", "***", "github-metrics", "github-metrics");
+  // let s3Dumper = new S3Dumper("***", "***", "github-metrics", "github-metrics");
 
   let to = new Date();
   let from = new Date();
@@ -19,7 +19,7 @@ async function run() {
   let scrapedData = await scraper.scrape(from, to, 14, 120);
 
   let csvBuff = await csvWriter.ToCSV(scrapedData);
-  await s3Dumper.Write(csvBuff, `${startTimeString}.csv`);
+  // await s3Dumper.Write(csvBuff, `${startTimeString}.csv`);
   return "Done good";
 }
 

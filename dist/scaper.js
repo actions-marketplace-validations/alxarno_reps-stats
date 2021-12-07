@@ -83,6 +83,7 @@ class GithubScraper {
       }
     }`;
             let repsProcessed = 0;
+            let requests = 0;
             do {
                 let commitsInfo = yield octokit.graphql({
                     query,
@@ -125,8 +126,9 @@ class GithubScraper {
                     done = true;
                 }
                 repsProcessed += commitsInfo.organization.repositories.nodes.length;
+                requests++;
             } while (!done);
-            console.log(`Commits statistics processed ${repsProcessed} repositories`);
+            console.log(`Commits statistics processed ${repsProcessed} repositories, made ${requests} requests`);
             return result;
         });
     }
@@ -178,11 +180,13 @@ class GithubScraper {
                     }
                 }
             };
+            let requests = 0;
             do {
                 let issuesInfo = yield octokit.graphql({
                     query,
                     issuePagination,
                 });
+                requests++;
                 issuesInfo.search.edges.forEach((v) => {
                     let issue = v.node;
                     let issueAuthor = issue.author.login;
@@ -203,7 +207,7 @@ class GithubScraper {
                 }
                 issuesProcessed += issuesInfo.search.edges.length;
             } while (!done);
-            console.log(`Open Issues statistics processed ${issuesProcessed} issues`);
+            console.log(`Open Issues statistics processed ${issuesProcessed} issues, made ${requests} requests`);
             return result;
         });
     }
@@ -250,11 +254,13 @@ class GithubScraper {
       }
     }`;
             let issuesProcessed = 0;
+            let requests = 0;
             do {
                 let issuesInfo = yield octokit.graphql({
                     query,
                     issuePagination,
                 });
+                requests++;
                 issuesInfo.search.edges.forEach((v) => {
                     let issue = v.node;
                     let issueAuthor = issue.author.login;
@@ -285,7 +291,7 @@ class GithubScraper {
                 }
                 issuesProcessed += issuesInfo.search.edges.length;
             } while (!done);
-            console.log(`Closing Issues activity processed ${issuesProcessed} issues`);
+            console.log(`Closing Issues activity processed ${issuesProcessed} issues, made ${requests} requests`);
             return result;
         });
     }
@@ -351,12 +357,14 @@ class GithubScraper {
       }
     }`;
             let issuesProcessed = 0;
+            let requests = 0;
             do {
                 let issuesInfo = yield octokit.graphql({
                     query,
                     issuePagination,
                     commentPagination,
                 });
+                requests++;
                 issuesInfo.search.edges.forEach((v) => {
                     let issue = v.node;
                     let issueAuthor = issue.author.login;
@@ -392,7 +400,7 @@ class GithubScraper {
                 }
                 issuesProcessed++;
             } while (!done);
-            console.log(`Issues Activity processed ${issuesProcessed} issues`);
+            console.log(`Issues Activity processed ${issuesProcessed} issues, made ${requests} requests`);
             return result;
         });
     }
@@ -426,6 +434,7 @@ class GithubScraper {
     }`;
             let hasNextPageMember = false;
             let getMemberResult = null;
+            let requests = 0;
             do {
                 getMemberResult = yield octokit.graphql({
                     query,
@@ -435,6 +444,7 @@ class GithubScraper {
                     to,
                     cursorID: paginationMember,
                 });
+                requests++;
                 const membersObj = getMemberResult.organization.membersWithRole.nodes;
                 hasNextPageMember =
                     getMemberResult.organization.membersWithRole.pageInfo.hasNextPage;
@@ -467,7 +477,7 @@ class GithubScraper {
                     });
                 }
             } while (hasNextPageMember);
-            console.log(`All Users Activity processed ${contribs.length} users`);
+            console.log(`All Users Activity processed ${contribs.length} users, made ${requests} requests`);
             return contribs;
         });
     }
