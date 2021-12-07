@@ -21,7 +21,7 @@ function run() {
         let to = new Date();
         let from = new Date();
         let startTimeString = to.toISOString().substring(0, 19);
-        from.setDate(to.getDate() - 1);
+        from.setDate(to.getDate() - 7);
         console.log(from, to);
         let scrapedData = yield scraper.scrape(from, to, 14, 120);
         let csvBuff = yield csvWriter.ToCSV(scrapedData);

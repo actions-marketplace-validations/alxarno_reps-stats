@@ -14,7 +14,7 @@ async function run() {
 
   let startTimeString = to.toISOString().substring(0, 19);
 
-  from.setDate(to.getDate() - 1);
+  from.setDate(to.getDate() - 7);
   console.log(from, to);
   let scrapedData = await scraper.scrape(from, to, 14, 120);
 

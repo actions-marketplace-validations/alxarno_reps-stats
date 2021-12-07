@@ -414,14 +414,22 @@ export class GithubScraper {
 
     let issuesProcessed = 0;
     let requests = 0;
-
+    let objects = 0;
+    let issuesInfo: any = null;
     do {
-      let issuesInfo: any = await octokit.graphql({
-        query,
-        issuePagination,
-        commentPagination,
-      });
-      requests++;
+      try {
+        issuesInfo = await octokit.graphql({
+          query,
+          issuePagination,
+          commentPagination,
+        });
+        requests++;
+      } catch (e) {
+        console.log(
+          `Issues Activity failed ${issuesProcessed} issues, made ${requests} requests`
+        );
+        throw e;
+      }
       issuesInfo.search.edges.forEach((v: any) => {
         let issue = v.node;
         let issueAuthor = issue.author.login;
@@ -466,6 +474,12 @@ export class GithubScraper {
     );
 
     return result;
+  }
+
+  async pullRateLimits(octokit: Octokit) {
+    let response = await octokit.request("GET /rate_limit");
+    console.log("Rate limits");
+    console.log(response.data.resources);
   }
 
   async pullAllUsersActivity(
@@ -582,7 +596,7 @@ export class GithubScraper {
   ): Promise<IUserInfo[]> {
     const octokit = new Octokit({ auth: this.github_token });
     await this.pullOrgID(octokit);
-
+    await this.pullRateLimits(octokit);
     let [
       allUsersActivity,
       commitsStatistics,
@@ -596,6 +610,7 @@ export class GithubScraper {
       this.pullCloseIssuesActivity(octokit, from, to),
       this.pullOpenIssuesStatistics(octokit, stale, old),
     ]);
+    await this.pullRateLimits(octokit);
 
     let result: IUserInfo[] = allUsersActivity.map((v: IUserInfo) => {
       let login = v.Member;

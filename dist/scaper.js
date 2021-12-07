@@ -358,13 +358,21 @@ class GithubScraper {
     }`;
             let issuesProcessed = 0;
             let requests = 0;
+            let objects = 0;
+            let issuesInfo = null;
             do {
-                let issuesInfo = yield octokit.graphql({
-                    query,
-                    issuePagination,
-                    commentPagination,
-                });
-                requests++;
+                try {
+                    issuesInfo = yield octokit.graphql({
+                        query,
+                        issuePagination,
+                        commentPagination,
+                    });
+                    requests++;
+                }
+                catch (e) {
+                    console.log(`Issues Activity failed ${issuesProcessed} issues, made ${requests} requests`);
+                    throw e;
+                }
                 issuesInfo.search.edges.forEach((v) => {
                     let issue = v.node;
                     let issueAuthor = issue.author.login;
@@ -402,6 +410,13 @@ class GithubScraper {
             } while (!done);
             console.log(`Issues Activity processed ${issuesProcessed} issues, made ${requests} requests`);
             return result;
+        });
+    }
+    pullRateLimits(octokit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let response = yield octokit.request("GET /rate_limit");
+            console.log("Rate limits");
+            console.log(response.data.resources);
         });
     }
     pullAllUsersActivity(octokit, from, to) {
@@ -499,6 +514,7 @@ class GithubScraper {
         return __awaiter(this, void 0, void 0, function* () {
             const octokit = new core_1.Octokit({ auth: this.github_token });
             yield this.pullOrgID(octokit);
+            yield this.pullRateLimits(octokit);
             let [allUsersActivity, commitsStatistics, commentsActivity, closeActivity, openedIssuesActivity,] = yield Promise.all([
                 this.pullAllUsersActivity(octokit, from, to),
                 this.pullCommitsStatistics(octokit, from, to),
@@ -506,6 +522,7 @@ class GithubScraper {
                 this.pullCloseIssuesActivity(octokit, from, to),
                 this.pullOpenIssuesStatistics(octokit, stale, old),
             ]);
+            yield this.pullRateLimits(octokit);
             let result = allUsersActivity.map((v) => {
                 let login = v.Member;
                 if (login in commitsStatistics) {
