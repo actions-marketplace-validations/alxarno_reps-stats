@@ -416,6 +416,7 @@ export class GithubScraper {
     let requests = 0;
     let objects = 0;
     let issuesInfo: any = null;
+    let commentedDone = false;
     do {
       try {
         issuesInfo = await octokit.graphql({
@@ -442,6 +443,9 @@ export class GithubScraper {
           if (createdAt < from.getTime() || createdAt > to.getTime()) {
             return;
           }
+          if (createdAt < from.getTime()) {
+            commentedDone = true;
+          }
           if (!(commentAuthor in result)) {
             result = this.initAuthor(commentAuthor, result);
           }
@@ -456,9 +460,12 @@ export class GithubScraper {
           }
         });
       });
-      if (issuesInfo.search.edges[0].node.hasPreviousPage) {
+      if (issuesInfo.search.edges[0].node.hasPreviousPage && !commentedDone) {
         commentPagination = issuesInfo.search.edges[0].node.startCursor;
         continue;
+      } else if (commentedDone) {
+        commentPagination = null;
+        commentedDone = false;
       }
 
       if (issuesInfo.search.pageInfo.hasNextPage) {
@@ -597,19 +604,16 @@ export class GithubScraper {
     const octokit = new Octokit({ auth: this.github_token });
     await this.pullOrgID(octokit);
     await this.pullRateLimits(octokit);
-    let [
-      allUsersActivity,
-      commitsStatistics,
-      commentsActivity,
-      closeActivity,
-      openedIssuesActivity,
-    ] = await Promise.all([
-      this.pullAllUsersActivity(octokit, from, to),
-      this.pullCommitsStatistics(octokit, from, to),
-      this.pullCommentsActivity(octokit, from, to),
-      this.pullCloseIssuesActivity(octokit, from, to),
-      this.pullOpenIssuesStatistics(octokit, stale, old),
-    ]);
+    let allUsersActivity = await this.pullAllUsersActivity(octokit, from, to);
+    let commitsStatistics = await this.pullCommitsStatistics(octokit, from, to);
+    let commentsActivity = await this.pullCommentsActivity(octokit, from, to);
+    let closeActivity = await this.pullCloseIssuesActivity(octokit, from, to);
+    let openedIssuesActivity = await this.pullOpenIssuesStatistics(
+      octokit,
+      stale,
+      old
+    );
+
     await this.pullRateLimits(octokit);
 
     let result: IUserInfo[] = allUsersActivity.map((v: IUserInfo) => {

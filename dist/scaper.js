@@ -360,6 +360,7 @@ class GithubScraper {
             let requests = 0;
             let objects = 0;
             let issuesInfo = null;
+            let commentedDone = false;
             do {
                 try {
                     issuesInfo = yield octokit.graphql({
@@ -384,6 +385,9 @@ class GithubScraper {
                         if (createdAt < from.getTime() || createdAt > to.getTime()) {
                             return;
                         }
+                        if (createdAt < from.getTime()) {
+                            commentedDone = true;
+                        }
                         if (!(commentAuthor in result)) {
                             result = this.initAuthor(commentAuthor, result);
                         }
@@ -396,9 +400,13 @@ class GithubScraper {
                         }
                     });
                 });
-                if (issuesInfo.search.edges[0].node.hasPreviousPage) {
+                if (issuesInfo.search.edges[0].node.hasPreviousPage && !commentedDone) {
                     commentPagination = issuesInfo.search.edges[0].node.startCursor;
                     continue;
+                }
+                else if (commentedDone) {
+                    commentPagination = null;
+                    commentedDone = false;
                 }
                 if (issuesInfo.search.pageInfo.hasNextPage) {
                     issuePagination = issuesInfo.search.pageInfo.endCursor;
@@ -515,13 +523,11 @@ class GithubScraper {
             const octokit = new core_1.Octokit({ auth: this.github_token });
             yield this.pullOrgID(octokit);
             yield this.pullRateLimits(octokit);
-            let [allUsersActivity, commitsStatistics, commentsActivity, closeActivity, openedIssuesActivity,] = yield Promise.all([
-                this.pullAllUsersActivity(octokit, from, to),
-                this.pullCommitsStatistics(octokit, from, to),
-                this.pullCommentsActivity(octokit, from, to),
-                this.pullCloseIssuesActivity(octokit, from, to),
-                this.pullOpenIssuesStatistics(octokit, stale, old),
-            ]);
+            let allUsersActivity = yield this.pullAllUsersActivity(octokit, from, to);
+            let commitsStatistics = yield this.pullCommitsStatistics(octokit, from, to);
+            let commentsActivity = yield this.pullCommentsActivity(octokit, from, to);
+            let closeActivity = yield this.pullCloseIssuesActivity(octokit, from, to);
+            let openedIssuesActivity = yield this.pullOpenIssuesStatistics(octokit, stale, old);
             yield this.pullRateLimits(octokit);
             let result = allUsersActivity.map((v) => {
                 let login = v.Member;
